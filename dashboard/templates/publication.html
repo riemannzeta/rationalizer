@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}{{ publication.name }} - News Rationalizer{% endblock %}
+
+{% block content %}
+<section>
+    <h1>{{ publication.name }}</h1>
+
+    <div class="stats-grid">
+        <div class="stat-box">
+            <div class="stat-number">{{ publication.total_articles }}</div>
+            <div class="stat-label">Total Articles</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number">{{ publication.balance_score|floatformat:2 }}</div>
+            <div class="stat-label">Balance Score</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number">#{{ publication.balance_rank }}</div>
+            <div class="stat-label">Balance Rank</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number">{{ publication.overall_avg_valence|floatformat:2 }}</div>
+            <div class="stat-label">Overall Valence</div>
+        </div>
+    </div>
+
+    <div class="sidenote">
+        Balance score measures consistency across topics (higher = more consistent emotional tone across different subjects).
+        Overall valence shows average emotional tendency (negative to positive).
+    </div>
+</section>
+
+<section>
+    <h2>Valence Across Categories</h2>
+
+    <p>Average emotional valence by topic area (minimum 3 articles per category). Click a category to drill down into author-level details.</p>
+
+    <div class="author-ranking">
+        {% for metric in category_metrics %}
+        <div class="author-row">
+            <div class="author-name">
+                <a href="/publication/{{ publication.name }}/category/{{ metric.category.category_id }}/">{{ metric.category.label }}</a>
+                <span style="font-size: 0.85rem; color: #666;">({{ metric.article_count }} articles)</span>
+            </div>
+            <div class="author-bar-container">
+                <div style="position: absolute; left: 50%; width: 1px; height: 100%; background: #999;"></div>
+                {% if metric.avg_valence > 0 %}
+                <div class="author-bar positive" style="width: {{ metric.avg_valence|floatformat:2|slice:"1:"|add:"0"|floatformat:0 }}%;"></div>
+                {% elif metric.avg_valence < 0 %}
+                <div class="author-bar negative" style="width: {{ metric.avg_valence|floatformat:2|slice:"1:"|add:"0"|floatformat:0|cut:"-" }}%;"></div>
+                {% endif %}
+            </div>
+            <div class="author-score">
+                {{ metric.avg_valence|floatformat:3 }}
+            </div>
+        </div>
+        {% empty %}
+        <p>Insufficient data to calculate category-specific metrics (needs 3+ articles per category).</p>
+        {% endfor %}
+    </div>
+</section>
+
+{% if monthly_trend %}
+<section>
+    <h2>Historical Trend</h2>
+
+    <p class="sidenote">
+        Average valence by month (where data available):
+    </p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Month</th>
+                <th>Avg Valence</th>
+                <th>Articles</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for month in monthly_trend %}
+            <tr>
+                <td>{{ month.month|date:"M Y" }}</td>
+                <td>{{ month.avg_valence|floatformat:3 }}</td>
+                <td>{{ month.count }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endif %}
+
+<section>
+    <h2>Most Extreme Articles</h2>
+
+    {% if most_positive %}
+    <h3>Most Positive</h3>
+    <div class="article-item">
+        <div class="article-title">
+            <a href="{{ most_positive.url }}" target="_blank">{{ most_positive.title }}</a>
+        </div>
+        <div class="article-meta">
+            {% if most_positive.author %}{{ most_positive.author }} &bull; {% endif %}
+            {{ most_positive.published_date|date:"M d, Y" }} &bull;
+            Valence: <strong style="color: #388e3c;">+{{ most_positive.overall_valence|floatformat:2 }}</strong>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if most_negative %}
+    <h3>Most Negative</h3>
+    <div class="article-item">
+        <div class="article-title">
+            <a href="{{ most_negative.url }}" target="_blank">{{ most_negative.title }}</a>
+        </div>
+        <div class="article-meta">
+            {% if most_negative.author %}{{ most_negative.author }} &bull; {% endif %}
+            {{ most_negative.published_date|date:"M d, Y" }} &bull;
+            Valence: <strong style="color: #d32f2f;">{{ most_negative.overall_valence|floatformat:2 }}</strong>
+        </div>
+    </div>
+    {% endif %}
+</section>
+
+<section>
+    <h2>Recent Articles</h2>
+
+    <div class="article-list">
+        {% for article in articles %}
+        <div class="article-item">
+            <div class="article-title">
+                <a href="{{ article.url }}" target="_blank">{{ article.title }}</a>
+            </div>
+            <div class="article-meta">
+                {% if article.author %}{{ article.author }} &bull; {% endif %}
+                {{ article.published_date|date:"M d, Y" }} &bull;
+                {% if article.primary_category %}
+                    {{ article.get_primary_category_display|default:"Uncategorized" }} &bull;
+                {% endif %}
+                Valence: <strong>{{ article.overall_valence|floatformat:2 }}</strong>
+            </div>
+        </div>
+        {% empty %}
+        <p>No articles found.</p>
+        {% endfor %}
+    </div>
+
+    {% if total_articles > 20 %}
+    <p style="font-size: 0.9rem; color: #666;">Showing {{ articles|length }} of {{ total_articles }} total articles.</p>
+    {% endif %}
+</section>
+
+<section>
+    <p><a href="/rankings/">← View all publication rankings</a></p>
+</section>
+{% endblock %}

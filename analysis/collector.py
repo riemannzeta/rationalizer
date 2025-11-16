@@ -266,13 +266,13 @@ class ArticleCollector:
         return articles_with_authors
 
 
-def collect_news_data(months_back: int = 12, max_per_source: int = 200) -> List[Dict]:
+def collect_news_data(months_back: int = 12, max_per_source: int = 1000) -> List[Dict]:
     """
     Main function to collect news data.
 
     Args:
         months_back: How many months of data to collect (default: 12)
-        max_per_source: Maximum articles per source (default: 200)
+        max_per_source: Maximum articles per source (default: 1000)
 
     Returns:
         List of article dictionaries

@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}{{ publication.name }} - {{ category.label }} - News Rationalizer{% endblock %}
+
+{% block content %}
+<section>
+    <h1>{{ publication.name }} - {{ category.label }}</h1>
+
+    <p class="sidenote">
+        {{ category_info.description }}
+    </p>
+
+    {% if pub_metric %}
+    <div class="stats-grid">
+        <div class="stat-box">
+            <div class="stat-number">{{ pub_metric.article_count }}</div>
+            <div class="stat-label">Total Articles</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number">{{ total_authors }}</div>
+            <div class="stat-label">Authors</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number">{{ pub_metric.avg_valence|floatformat:2 }}</div>
+            <div class="stat-label">Avg Valence</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number">#{{ pub_metric.rank }}</div>
+            <div class="stat-label">Rank in Category</div>
+        </div>
+    </div>
+    {% endif %}
+</section>
+
+<section>
+    <h2>Author Breakdown</h2>
+
+    <p>All authors contributing to {{ publication.name }}'s coverage of {{ category.label }}, ranked by average emotional valence:</p>
+
+    <div class="author-ranking">
+        {% for author_data in author_breakdown %}
+        <div class="author-row">
+            <div class="author-name">
+                {% if author_data.author != "Unknown" %}
+                <a href="/author/{{ author_data.author }}/">{{ author_data.author }}</a>
+                {% else %}
+                {{ author_data.author }}
+                {% endif %}
+                <span style="font-size: 0.85rem; color: #666;">({{ author_data.article_count }} article{{ author_data.article_count|pluralize }})</span>
+            </div>
+            <div class="author-bar-container">
+                <div style="position: absolute; left: 50%; width: 1px; height: 100%; background: #999;"></div>
+                {% if author_data.avg_valence > 0 %}
+                <div class="author-bar positive" style="width: {{ author_data.avg_valence|floatformat:2|slice:"1:"|add:"0"|floatformat:0 }}%;"></div>
+                {% elif author_data.avg_valence < 0 %}
+                <div class="author-bar negative" style="width: {{ author_data.avg_valence|floatformat:2|slice:"1:"|add:"0"|floatformat:0|cut:"-" }}%;"></div>
+                {% endif %}
+            </div>
+            <div class="author-score">
+                {{ author_data.avg_valence|floatformat:3 }}
+            </div>
+        </div>
+        {% empty %}
+        <p>No author data available for this category.</p>
+        {% endfor %}
+    </div>
+</section>
+
+<section>
+    <h2>All Articles</h2>
+
+    <p class="sidenote">
+        All {{ total_articles }} articles in this category, listed chronologically:
+    </p>
+
+    {% for author_data in author_breakdown %}
+    <div style="margin-bottom: 2rem;">
+        <h3>
+            {% if author_data.author != "Unknown" %}
+            <a href="/author/{{ author_data.author }}/">{{ author_data.author }}</a>
+            {% else %}
+            {{ author_data.author }}
+            {% endif %}
+            <span style="font-weight: normal; font-size: 0.9rem; color: #666;">
+                ({{ author_data.article_count }} article{{ author_data.article_count|pluralize }}, avg valence: {{ author_data.avg_valence|floatformat:3 }})
+            </span>
+        </h3>
+
+        <div class="article-list">
+            {% for article in author_data.articles %}
+            <div class="article-item">
+                <div class="article-title">
+                    <a href="{{ article.url }}" target="_blank">{{ article.title }}</a>
+                </div>
+                <div class="article-meta">
+                    {{ article.date|date:"M d, Y" }} &bull;
+                    Valence:
+                    {% if article.valence >= 0 %}
+                    <strong style="color: #388e3c;">+{{ article.valence|floatformat:2 }}</strong>
+                    {% else %}
+                    <strong style="color: #d32f2f;">{{ article.valence|floatformat:2 }}</strong>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</section>
+
+<section>
+    <p>
+        <a href="/publication/{{ publication.name }}/">← Back to {{ publication.name }} profile</a> &bull;
+        <a href="/category/{{ category.category_id }}/">View all {{ category.label }} coverage</a>
+    </p>
+</section>
+{% endblock %}
