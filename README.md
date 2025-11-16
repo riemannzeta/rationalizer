@@ -307,9 +307,9 @@ If you use this project in academic work, please cite:
 ```bibtex
 @software{news_rationalizer,
   title = {News Rationalizer: Emotional Valence Analysis in Journalism},
-  author = {Your Name},
+  author = {Michael Frank Martin},
   year = {2025},
-  url = {https://github.com/yourusername/news-rationalizer}
+  url = {https://github.com/riemannzeta/news-rationalizer}
 }
 ```
 
