@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}News Rationalizer - Home{% endblock %}
+
+{% block content %}
+<section>
+    <h2>The Conjugate Principle</h2>
+
+    <p>
+        In complex number theory, multiplying a complex number by its <em>conjugate</em> yields a real number.
+        For example, <code>(3 + 4i) × (3 - 4i) = 25</code>. The imaginary components cancel out, leaving only the real.
+    </p>
+
+    <p>
+        Similarly, we can <strong>rationalize news coverage</strong> by pairing articles from authors with
+        complementary emotional valences—balancing positive-leaning and negative-leaning perspectives on the
+        same topic to approach more neutral, comprehensive understanding.
+    </p>
+
+    <div class="method-box">
+        <h3>How It Works</h3>
+        <p>
+            This analysis examines {{ total_articles|default:"hundreds of" }} articles
+            from {{ total_authors|default:"dozens of" }} journalists across diverse news sources.
+            Each article is analyzed for emotional valence (sentiment from -1 to +1) and categorized by topic.
+            Authors are then profiled based on their average emotional valence patterns across categories.
+        </p>
+        {% if earliest_date and latest_date %}
+        <p>
+            <strong>Data Range:</strong> {{ earliest_date|date:"F Y" }} to {{ latest_date|date:"F Y" }}
+        </p>
+        {% endif %}
+    </div>
+</section>
+
+<section>
+    <h2>Dataset Overview</h2>
+
+    <div class="stats-grid">
+        <div class="stat-box">
+            <div class="stat-number">{{ total_articles }}</div>
+            <div class="stat-label">Articles Analyzed</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number">{{ total_authors }}</div>
+            <div class="stat-label">Authors Profiled</div>
+        </div>
+        {% if latest_run %}
+        <div class="stat-box">
+            <div class="stat-number">{{ latest_run.run_date|date:"M d" }}</div>
+            <div class="stat-label">Last Updated</div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<section>
+    <h2>Topic Categories</h2>
+
+    <div class="category-grid">
+        {% for stat in category_stats %}
+        <div class="category-card">
+            <h3>
+                <a href="/category/{{ stat.category.category_id }}/">{{ stat.category.label }}</a>
+            </h3>
+            <p>{{ stat.category.description }}</p>
+            <p style="margin-top: 1rem; font-size: 0.9rem; color: #666;">
+                {{ stat.article_count }} articles &bull; {{ stat.author_count }} authors
+            </p>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+{% if sample_pairs %}
+<section>
+    <h2>Sample Complementary Pairs</h2>
+
+    <p class="sidenote">
+        These author pairs have opposing emotional valences on the same topic—ideal for "rationalized" reading.
+    </p>
+
+    {% for pair in sample_pairs %}
+    <div class="complementary-pair">
+        <h4>{{ pair.category.label }}</h4>
+        <div class="pair-authors">
+            <span class="pair-negative">
+                <a href="/author/{{ pair.negative_author.author.name }}/">
+                    {{ pair.negative_author.author.name }}
+                </a>
+                ({{ pair.negative_author.avg_valence|floatformat:2 }})
+            </span>
+            <span class="pair-divider">⟷</span>
+            <span class="pair-positive">
+                <a href="/author/{{ pair.positive_author.author.name }}/">
+                    {{ pair.positive_author.author.name }}
+                </a>
+                (+{{ pair.positive_author.avg_valence|floatformat:2 }})
+            </span>
+        </div>
+        <p style="margin-top: 0.5rem; font-size: 0.85rem; color: #666;">
+            Valence difference: {{ pair.valence_diff|floatformat:2 }}
+        </p>
+    </div>
+    {% endfor %}
+</section>
+{% endif %}
+
+<section>
+    <h2>Explore Further</h2>
+
+    <ul style="list-style-position: inside; line-height: 2;">
+        <li><a href="/rankings/">View Author Balance Rankings</a> — See who writes with the most balanced perspective</li>
+        {% for stat in category_stats|slice:":3" %}
+        <li><a href="/category/{{ stat.category.category_id }}/">{{ stat.category.label }} Analysis</a> — Explore emotional spectrum in this topic</li>
+        {% endfor %}
+        <li><a href="/about/">Methodology & Limitations</a> — Understand how this analysis works</li>
+    </ul>
+</section>
+{% endblock %}

@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title %}About & Methodology - News Rationalizer{% endblock %}
+
+{% block content %}
+<section>
+    <h1>About & Methodology</h1>
+
+    <p style="font-size: 1.1rem;">
+        News Rationalizer is an experimental analysis tool that measures emotional valence patterns
+        in journalism to identify balanced versus biased reporting across topics.
+    </p>
+</section>
+
+<section>
+    <h2>The Mathematical Analogy</h2>
+
+    <p>
+        In complex number theory, a <em>conjugate</em> is a number that, when multiplied with its pair,
+        eliminates the imaginary component and yields a real number:
+    </p>
+
+    <div class="method-box">
+        <code>(a + bi) × (a - bi) = a² + b²</code>
+    </div>
+
+    <p>
+        Similarly, we can "rationalize" news consumption by pairing articles from authors with
+        <strong>complementary emotional valences</strong>—combining a positive-leaning perspective
+        with a negative-leaning one on the same topic. The goal is to approach more comprehensive,
+        balanced understanding by exposing ourselves to opposing emotional framings.
+    </p>
+
+    <div class="sidenote">
+        Note: "Balanced" does not necessarily mean "accurate" or "unbiased." This is a measure of
+        emotional tone, not factual correctness or journalistic quality.
+    </div>
+</section>
+
+<section>
+    <h2>Analysis Pipeline</h2>
+
+    <h3>1. Data Collection</h3>
+    <p>
+        Articles are collected from diverse news sources via RSS feeds, including:
+        BBC, Reuters, The Guardian, NPR, Al Jazeera, The Hill, Axios, and TechCrunch.
+        We extract title, author, publication date, and content.
+    </p>
+
+    <h3>2. Topic Categorization</h3>
+    <p>
+        Each article is classified into one or more topic categories using keyword matching:
+    </p>
+    <ul style="margin-left: 2rem;">
+        {% for cat_id, cat_info in categories.items %}
+        <li><strong>{{ cat_info.label }}</strong>: {{ cat_info.description }}</li>
+        {% endfor %}
+    </ul>
+    <p class="sidenote">
+        Articles can belong to multiple categories with confidence scores. Only articles scoring
+        above 15% confidence in a category are included.
+    </p>
+
+    <h3>3. Sentiment Analysis</h3>
+    <p>
+        We apply a pre-trained RoBERTa sentiment model
+        (<code>cardiffnlp/twitter-roberta-base-sentiment-latest</code>)
+        to analyze emotional valence. Each article receives:
+    </p>
+    <ul style="margin-left: 2rem;">
+        <li>Title valence score (-1 to +1)</li>
+        <li>Content valence score (-1 to +1)</li>
+        <li>Combined overall valence (weighted 30% title, 70% content)</li>
+    </ul>
+
+    <h3>4. Author Profiling</h3>
+    <p>
+        For each author with at least 3 articles in a category, we calculate:
+    </p>
+    <ul style="margin-left: 2rem;">
+        <li><strong>Average valence</strong> per category</li>
+        <li><strong>Valence variance</strong> within categories (consistency)</li>
+        <li><strong>Cross-category variance</strong> (tone variation between topics)</li>
+        <li><strong>Balance score</strong>: <code>1 / (1 + cross_category_variance × 10)</code></li>
+    </ul>
+</section>
+
+<section>
+    <h2>Limitations & Caveats</h2>
+
+    <div class="method-box">
+        <h3>What Could Invalidate These Results?</h3>
+
+        <p><strong>Insufficient sample sizes:</strong> Authors need multiple articles per category for
+        meaningful metrics. We require minimum 3 articles per category.</p>
+
+        <p><strong>Model bias:</strong> The sentiment model was trained on Twitter data, which may not
+        generalize perfectly to news article language. It may misinterpret journalistic objectivity
+        as neutrality, or miss subtle emotional cues in formal writing.</p>
+
+        <p><strong>Topic misclassification:</strong> Keyword-based categorization can misfire. An article
+        mentioning "nuclear" in passing might be incorrectly categorized as being about nuclear energy.</p>
+
+        <p><strong>Conflating sentiment with bias:</strong> Negative emotional valence doesn't mean
+        "biased" or "wrong." A critical article about healthcare failures may be both accurate and
+        negatively-valenced. Positive framing can also be misleading.</p>
+
+        <p><strong>Missing context:</strong> We analyze tone, not truthfulness, depth, or quality.
+        A "balanced" author by our metric might simply avoid emotional language while still being
+        one-sided in their analysis.</p>
+    </div>
+</section>
+
+<section>
+    <h2>How to Use This Tool</h2>
+
+    <p>
+        <strong>Explore category pages</strong> to see the emotional spectrum of coverage on a topic.
+        Look for "complementary pairs" of authors with opposing valences to read both sides.
+    </p>
+
+    <p>
+        <strong>Check author profiles</strong> to understand individual writing patterns across topics.
+        Authors with high balance scores maintain consistent tone; low scores suggest topic-dependent framing.
+    </p>
+
+    <p>
+        <strong>Remember:</strong> This is a <em>heuristic</em>, not a truth machine. Use it as one input
+        among many when evaluating media sources. Emotional valence is interesting but doesn't replace
+        critical thinking about accuracy, sourcing, and argumentation quality.
+    </p>
+</section>
+
+<section>
+    <h2>Falsifiability & Testing</h2>
+
+    <p>To test whether this system is working correctly, we include:</p>
+
+    <ul style="margin-left: 2rem;">
+        <li>Sample size indicators (article counts, confidence scores)</li>
+        <li>Access to individual articles so you can manually verify sentiment classifications</li>
+        <li>Variance metrics to show when an author's tone is inconsistent (low confidence in categorization)</li>
+        <li>This methodology page explaining our assumptions and known failure modes</li>
+    </ul>
+
+    <p>
+        If you find cases where the sentiment analysis seems obviously wrong, or where categorization
+        misses the point of an article, those are valuable data points about the system's limitations.
+    </p>
+</section>
+
+<section>
+    <h2>Source Code & Data</h2>
+
+    <p>
+        This project is open source. See the repository for complete source code, analysis pipeline,
+        and deployment instructions.
+    </p>
+</section>
+
+<section>
+    <p><a href="/">← Back to home</a></p>
+</section>
+{% endblock %}

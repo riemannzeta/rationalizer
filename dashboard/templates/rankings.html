@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}Author Balance Rankings - News Rationalizer{% endblock %}
+
+{% block content %}
+<section>
+    <h1>Author Balance Rankings</h1>
+
+    <p>
+        Authors ranked by their <strong>balance score</strong>—a measure of how consistent their emotional
+        valence is across different topic areas. Higher scores indicate more balanced coverage; lower scores
+        suggest more variation in tone between topics.
+    </p>
+
+    <div class="method-box">
+        <h3>Balance Score Calculation</h3>
+        <p>
+            Balance score is calculated as: <code>1 / (1 + cross_category_variance × 10)</code>
+        </p>
+        <p>
+            Authors with low variance across categories (similar emotional tone regardless of topic) score near 1.0.
+            Authors whose tone varies significantly between topics score closer to 0.
+        </p>
+    </div>
+</section>
+
+<section>
+    <h2>Most Balanced Authors</h2>
+
+    <p class="sidenote">
+        These authors maintain the most consistent emotional tone across different topics.
+    </p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Author</th>
+                <th>Balance Score</th>
+                <th>Articles</th>
+                <th>Avg Valence</th>
+                <th>Topics Covered</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for author in most_balanced %}
+            <tr>
+                <td>#{{ author.balance_rank }}</td>
+                <td><a href="/author/{{ author.name }}/">{{ author.name }}</a></td>
+                <td>{{ author.balance_score|floatformat:3 }}</td>
+                <td>{{ author.total_articles }}</td>
+                <td>{{ author.overall_avg_valence|floatformat:2 }}</td>
+                <td>{{ author.get_categories_covered|length }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6">No data available.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+
+<section>
+    <h2>Most Polarized Authors</h2>
+
+    <p class="sidenote">
+        These authors show the most variation in emotional tone across different topics.
+    </p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Author</th>
+                <th>Balance Score</th>
+                <th>Articles</th>
+                <th>Avg Valence</th>
+                <th>Topics Covered</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for author in most_polarized %}
+            <tr>
+                <td>#{{ author.balance_rank }}</td>
+                <td><a href="/author/{{ author.name }}/">{{ author.name }}</a></td>
+                <td>{{ author.balance_score|floatformat:3 }}</td>
+                <td>{{ author.total_articles }}</td>
+                <td>{{ author.overall_avg_valence|floatformat:2 }}</td>
+                <td>{{ author.get_categories_covered|length }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6">No data available.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+
+<section>
+    <h2>All Authors</h2>
+
+    <p class="sidenote">
+        Complete list of authors with at least 5 categorized articles, sorted by balance score.
+    </p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Author</th>
+                <th>Balance Score</th>
+                <th>Articles</th>
+                <th>Avg Valence</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for author in all_authors %}
+            <tr>
+                <td>#{{ author.balance_rank }}</td>
+                <td><a href="/author/{{ author.name }}/">{{ author.name }}</a></td>
+                <td>{{ author.balance_score|floatformat:3 }}</td>
+                <td>{{ author.total_articles }}</td>
+                <td>{{ author.overall_avg_valence|floatformat:2 }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5">No data available.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <p style="font-size: 0.9rem; color: #666; margin-top: 1rem;">
+        Total: {{ total_authors }} authors
+    </p>
+</section>
+
+<section>
+    <p><a href="/">← Back to home</a></p>
+</section>
+{% endblock %}

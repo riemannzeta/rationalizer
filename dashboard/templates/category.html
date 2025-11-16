@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}{{ category.label }} - News Rationalizer{% endblock %}
+
+{% block content %}
+<section>
+    <h1>{{ category.label }}</h1>
+
+    <p style="font-size: 1.1rem; color: #666; font-style: italic;">
+        {{ category_info.description }}
+    </p>
+
+    <div class="stats-grid">
+        <div class="stat-box">
+            <div class="stat-number">{{ total_articles }}</div>
+            <div class="stat-label">Total Articles</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number">{{ total_authors }}</div>
+            <div class="stat-label">Authors (3+ articles)</div>
+        </div>
+    </div>
+</section>
+
+<section>
+    <h2>Author Valence Spectrum</h2>
+
+    <p class="sidenote">
+        Authors ranked by average emotional valence in their {{ category.label|lower }} coverage.
+        Negative values indicate more critical/pessimistic tone; positive values indicate more optimistic/favorable tone.
+    </p>
+
+    <div class="author-ranking">
+        {% for metric in author_metrics %}
+        <div class="author-row">
+            <div class="author-name">
+                <a href="/author/{{ metric.author.name }}/">{{ metric.author.name }}</a>
+            </div>
+            <div class="author-bar-container">
+                <div style="position: absolute; left: 50%; width: 1px; height: 100%; background: #999;"></div>
+                {% if metric.avg_valence > 0 %}
+                <div class="author-bar positive" style="width: {{ metric.avg_valence|floatformat:2|slice:"1:"|add:"0"|floatformat:0 }}%;"></div>
+                {% elif metric.avg_valence < 0 %}
+                <div class="author-bar negative" style="width: {{ metric.avg_valence|floatformat:2|slice:"1:"|add:"0"|floatformat:0|cut:"-" }}%;"></div>
+                {% endif %}
+            </div>
+            <div class="author-score">
+                {{ metric.avg_valence|floatformat:3 }}
+            </div>
+        </div>
+        {% empty %}
+        <p>No author data available for this category yet.</p>
+        {% endfor %}
+    </div>
+</section>
+
+{% if complementary_pairs %}
+<section>
+    <h2>Complementary Author Pairs</h2>
+
+    <p class="sidenote">
+        These pairs have opposing emotional valences—reading both provides a "rationalized" perspective.
+    </p>
+
+    {% for pair in complementary_pairs %}
+    <div class="complementary-pair">
+        <div class="pair-authors">
+            <span class="pair-negative">
+                <a href="/author/{{ pair.negative_author.author.name }}/">
+                    {{ pair.negative_author.author.name }}
+                </a>
+                ({{ pair.negative_author.avg_valence|floatformat:2 }})
+            </span>
+            <span class="pair-divider">⟷</span>
+            <span class="pair-positive">
+                <a href="/author/{{ pair.positive_author.author.name }}/">
+                    {{ pair.positive_author.author.name }}
+                </a>
+                (+{{ pair.positive_author.avg_valence|floatformat:2 }})
+            </span>
+        </div>
+        <p style="font-size: 0.85rem; color: #666; margin-top: 0.3rem;">
+            Articles: {{ pair.negative_author.article_count }} &amp; {{ pair.positive_author.article_count }}
+            &bull; Complementarity: {{ pair.complementarity|floatformat:2 }}
+        </p>
+    </div>
+    {% endfor %}
+</section>
+{% endif %}
+
+<section>
+    <h2>Sample Articles</h2>
+
+    <h3>Most Positive</h3>
+    <div class="article-list">
+        {% for article in positive_articles %}
+        <div class="article-item">
+            <div class="article-title">
+                <a href="{{ article.url }}" target="_blank">{{ article.title }}</a>
+            </div>
+            <div class="article-meta">
+                {{ article.author|default:"Unknown Author" }} &bull; {{ article.publication }} &bull;
+                {{ article.published_date|date:"M d, Y" }} &bull;
+                Valence: <strong style="color: #388e3c;">+{{ article.overall_valence|floatformat:2 }}</strong>
+            </div>
+        </div>
+        {% empty %}
+        <p>No positive-leaning articles found.</p>
+        {% endfor %}
+    </div>
+
+    <h3>Most Negative</h3>
+    <div class="article-list">
+        {% for article in negative_articles %}
+        <div class="article-item">
+            <div class="article-title">
+                <a href="{{ article.url }}" target="_blank">{{ article.title }}</a>
+            </div>
+            <div class="article-meta">
+                {{ article.author|default:"Unknown Author" }} &bull; {{ article.publication }} &bull;
+                {{ article.published_date|date:"M d, Y" }} &bull;
+                Valence: <strong style="color: #d32f2f;">{{ article.overall_valence|floatformat:2 }}</strong>
+            </div>
+        </div>
+        {% empty %}
+        <p>No negative-leaning articles found.</p>
+        {% endfor %}
+    </div>
+</section>
+
+<section>
+    <p><a href="/">← Back to all categories</a></p>
+</section>
+{% endblock %}
