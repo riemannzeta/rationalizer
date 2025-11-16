@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 
-{% block title %}Author Balance Rankings - News Rationalizer{% endblock %}
+{% block title %}Author & Publication Rankings - News Rationalizer{% endblock %}
 
 {% block content %}
 <section>
-    <h1>Author Balance Rankings</h1>
+    <h1>Author & Publication Rankings</h1>
 
     <p>
-        Authors ranked by their <strong>balance score</strong>—a measure of how consistent their emotional
+        Authors and publications ranked by their <strong>balance score</strong>—a measure of how consistent their emotional
         valence is across different topic areas. Higher scores indicate more balanced coverage; lower scores
         suggest more variation in tone between topics.
     </p>
@@ -128,6 +128,113 @@
 
     <p style="font-size: 0.9rem; color: #666; margin-top: 1rem;">
         Total: {{ total_authors }} authors
+    </p>
+</section>
+
+<section>
+    <h2>Most Balanced Publications</h2>
+
+    <p class="sidenote">
+        These publications maintain the most consistent emotional tone across different topics.
+    </p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Publication</th>
+                <th>Balance Score</th>
+                <th>Articles</th>
+                <th>Avg Valence</th>
+                <th>Topics Covered</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pub in most_balanced_publications %}
+            <tr>
+                <td>#{{ pub.balance_rank }}</td>
+                <td><a href="/publication/{{ pub.name }}/">{{ pub.name }}</a></td>
+                <td>{{ pub.balance_score|floatformat:3 }}</td>
+                <td>{{ pub.total_articles }}</td>
+                <td>{{ pub.overall_avg_valence|floatformat:2 }}</td>
+                <td>{{ pub.get_categories_covered|length }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6">No data available.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+
+<section>
+    <h2>Most Polarized Publications</h2>
+
+    <p class="sidenote">
+        These publications show the most variation in emotional tone across different topics.
+    </p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Publication</th>
+                <th>Balance Score</th>
+                <th>Articles</th>
+                <th>Avg Valence</th>
+                <th>Topics Covered</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pub in most_polarized_publications %}
+            <tr>
+                <td>#{{ pub.balance_rank }}</td>
+                <td><a href="/publication/{{ pub.name }}/">{{ pub.name }}</a></td>
+                <td>{{ pub.balance_score|floatformat:3 }}</td>
+                <td>{{ pub.total_articles }}</td>
+                <td>{{ pub.overall_avg_valence|floatformat:2 }}</td>
+                <td>{{ pub.get_categories_covered|length }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6">No data available.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+
+<section>
+    <h2>All Publications</h2>
+
+    <p class="sidenote">
+        Complete list of publications, sorted by balance score.
+    </p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Publication</th>
+                <th>Balance Score</th>
+                <th>Articles</th>
+                <th>Avg Valence</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pub in all_publications %}
+            <tr>
+                <td>#{{ pub.balance_rank }}</td>
+                <td><a href="/publication/{{ pub.name }}/">{{ pub.name }}</a></td>
+                <td>{{ pub.balance_score|floatformat:3 }}</td>
+                <td>{{ pub.total_articles }}</td>
+                <td>{{ pub.overall_avg_valence|floatformat:2 }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5">No data available.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <p style="font-size: 0.9rem; color: #666; margin-top: 1rem;">
+        Total: {{ total_publications }} publications
     </p>
 </section>
 

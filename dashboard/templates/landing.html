@@ -21,9 +21,9 @@
         <h3>How It Works</h3>
         <p>
             This analysis examines {{ total_articles|default:"hundreds of" }} articles
-            from {{ total_authors|default:"dozens of" }} journalists across diverse news sources.
+            from {{ total_authors|default:"dozens of" }} journalists across {{ total_publications|default:"multiple" }} publications.
             Each article is analyzed for emotional valence (sentiment from -1 to +1) and categorized by topic.
-            Authors are then profiled based on their average emotional valence patterns across categories.
+            Authors and publications are profiled based on their average emotional valence patterns across categories.
         </p>
         {% if earliest_date and latest_date %}
         <p>
@@ -45,6 +45,10 @@
             <div class="stat-number">{{ total_authors }}</div>
             <div class="stat-label">Authors Profiled</div>
         </div>
+        <div class="stat-box">
+            <div class="stat-number">{{ total_publications }}</div>
+            <div class="stat-label">Publications Tracked</div>
+        </div>
         {% if latest_run %}
         <div class="stat-box">
             <div class="stat-number">{{ latest_run.run_date|date:"M d" }}</div>
@@ -65,7 +69,7 @@
             </h3>
             <p>{{ stat.category.description }}</p>
             <p style="margin-top: 1rem; font-size: 0.9rem; color: #666;">
-                {{ stat.article_count }} articles &bull; {{ stat.author_count }} authors
+                {{ stat.article_count }} articles &bull; {{ stat.author_count }} authors &bull; {{ stat.publication_count }} publications
             </p>
         </div>
         {% endfor %}
@@ -110,7 +114,7 @@
     <h2>Explore Further</h2>
 
     <ul style="list-style-position: inside; line-height: 2;">
-        <li><a href="/rankings/">View Author Balance Rankings</a> — See who writes with the most balanced perspective</li>
+        <li><a href="/rankings/">View Author & Publication Rankings</a> — See who writes with the most balanced perspective</li>
         {% for stat in category_stats|slice:":3" %}
         <li><a href="/category/{{ stat.category.category_id }}/">{{ stat.category.label }} Analysis</a> — Explore emotional spectrum in this topic</li>
         {% endfor %}

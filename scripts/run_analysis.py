@@ -315,8 +315,8 @@ def main():
     parser.add_argument(
         '--max-per-source',
         type=int,
-        default=200,
-        help='Maximum articles per source (default: 200)'
+        default=1000,
+        help='Maximum articles per source (default: 1000)'
     )
     parser.add_argument(
         '--skip-collection',
@@ -352,7 +352,7 @@ def main():
         articles = categorize_articles(
             articles,
             use_ml=args.use_ml,
-            min_confidence=0.15
+            min_confidence=0.10
         )
 
         # Filter out uncategorized articles
