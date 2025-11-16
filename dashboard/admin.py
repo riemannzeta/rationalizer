@@ -5,7 +5,8 @@ Django admin configuration for News Rationalizer.
 from django.contrib import admin
 from .models import (
     Article, Category, ArticleCategory, AuthorProfile,
-    AuthorCategoryMetric, AnalysisRun
+    AuthorCategoryMetric, PublicationProfile,
+    PublicationCategoryMetric, AnalysisRun
 )
 
 
@@ -45,7 +46,22 @@ class AuthorCategoryMetricAdmin(admin.ModelAdmin):
     search_fields = ['author__name']
 
 
+@admin.register(PublicationProfile)
+class PublicationProfileAdmin(admin.ModelAdmin):
+    list_display = ['name', 'total_articles', 'balance_score', 'balance_rank', 'overall_avg_valence']
+    list_filter = ['balance_rank']
+    search_fields = ['name']
+    ordering = ['-balance_score']
+
+
+@admin.register(PublicationCategoryMetric)
+class PublicationCategoryMetricAdmin(admin.ModelAdmin):
+    list_display = ['publication', 'category', 'article_count', 'avg_valence', 'rank']
+    list_filter = ['category']
+    search_fields = ['publication__name']
+
+
 @admin.register(AnalysisRun)
 class AnalysisRunAdmin(admin.ModelAdmin):
-    list_display = ['run_date', 'articles_collected', 'authors_profiled']
+    list_display = ['run_date', 'articles_collected', 'authors_profiled', 'publications_profiled']
     date_hierarchy = 'run_date'
