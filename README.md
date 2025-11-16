@@ -292,7 +292,7 @@ This is a demonstration project. Potential improvements:
 
 ## License
 
-[Choose appropriate license - MIT, Apache 2.0, etc.]
+MIT
 
 ## Acknowledgments
 
