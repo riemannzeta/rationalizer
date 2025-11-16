@@ -29,11 +29,12 @@ django.setup()
 from analysis.collector import collect_news_data
 from analysis.categorizer import categorize_articles, CATEGORIES
 from analysis.sentiment import analyze_sentiment
-from analysis.profiler import profile_authors
+from analysis.profiler import profile_authors, profile_publications
 
 from dashboard.models import (
     Article, Category, ArticleCategory, AuthorProfile,
-    AuthorCategoryMetric, AnalysisRun
+    AuthorCategoryMetric, PublicationProfile, PublicationCategoryMetric,
+    AnalysisRun
 )
 
 
@@ -196,7 +197,89 @@ def save_author_profiles_to_db(profiles):
     print(f"  ✓ Saved all author profiles")
 
 
-def create_analysis_run_record(articles_collected, articles_categorized, articles_analyzed, authors_profiled):
+def save_publication_profiles_to_db(profiles):
+    """Save publication profiles to database."""
+    print(f"\n📰 Saving {len(profiles)} publication profiles to database...")
+
+    for pub_name, profile_data in profiles.items():
+        # Get or create publication profile
+        profile, created = PublicationProfile.objects.get_or_create(
+            name=pub_name,
+            defaults={
+                'total_articles': profile_data.get('total_articles', 0),
+                'categorized_articles': profile_data.get('categorized_articles', 0),
+                'overall_avg_valence': profile_data.get('overall_avg_valence', 0.0),
+                'overall_variance': profile_data.get('overall_variance', 0.0),
+                'cross_category_variance': profile_data.get('cross_category_variance', 0.0),
+                'balance_score': profile_data.get('balance_score', 0.0),
+                'balance_rank': profile_data.get('balance_rank', 0),
+            }
+        )
+
+        if not created:
+            # Update existing profile
+            profile.total_articles = profile_data.get('total_articles', 0)
+            profile.categorized_articles = profile_data.get('categorized_articles', 0)
+            profile.overall_avg_valence = profile_data.get('overall_avg_valence', 0.0)
+            profile.overall_variance = profile_data.get('overall_variance', 0.0)
+            profile.cross_category_variance = profile_data.get('cross_category_variance', 0.0)
+            profile.balance_score = profile_data.get('balance_score', 0.0)
+            profile.balance_rank = profile_data.get('balance_rank', 0)
+            profile.save()
+
+        # Save category metrics
+        for cat_id, cat_metrics in profile_data.get('category_metrics', {}).items():
+            try:
+                category = Category.objects.get(category_id=cat_id)
+
+                # Get most positive/negative articles
+                most_positive_article = None
+                most_negative_article = None
+
+                if cat_metrics.get('most_positive'):
+                    most_positive_article = Article.objects.filter(
+                        url=cat_metrics['most_positive'].get('url')
+                    ).first()
+
+                if cat_metrics.get('most_negative'):
+                    most_negative_article = Article.objects.filter(
+                        url=cat_metrics['most_negative'].get('url')
+                    ).first()
+
+                # Create or update metric
+                metric, created = PublicationCategoryMetric.objects.get_or_create(
+                    publication=profile,
+                    category=category,
+                    defaults={
+                        'article_count': cat_metrics.get('article_count', 0),
+                        'avg_valence': cat_metrics.get('avg_valence', 0.0),
+                        'valence_variance': cat_metrics.get('valence_variance', 0.0),
+                        'valence_stdev': cat_metrics.get('valence_stdev', 0.0),
+                        'rank': cat_metrics.get('rank', 0),
+                        'total_in_category': cat_metrics.get('total_in_category', 0),
+                        'most_positive_article': most_positive_article,
+                        'most_negative_article': most_negative_article,
+                    }
+                )
+
+                if not created:
+                    metric.article_count = cat_metrics.get('article_count', 0)
+                    metric.avg_valence = cat_metrics.get('avg_valence', 0.0)
+                    metric.valence_variance = cat_metrics.get('valence_variance', 0.0)
+                    metric.valence_stdev = cat_metrics.get('valence_stdev', 0.0)
+                    metric.rank = cat_metrics.get('rank', 0)
+                    metric.total_in_category = cat_metrics.get('total_in_category', 0)
+                    metric.most_positive_article = most_positive_article
+                    metric.most_negative_article = most_negative_article
+                    metric.save()
+
+            except Category.DoesNotExist:
+                print(f"  ✗ Category not found: {cat_id}")
+
+    print(f"  ✓ Saved all publication profiles")
+
+
+def create_analysis_run_record(articles_collected, articles_categorized, articles_analyzed, authors_profiled, publications_profiled=0):
     """Create a record of this analysis run."""
     # Get date range
     all_articles = Article.objects.all()
@@ -208,6 +291,7 @@ def create_analysis_run_record(articles_collected, articles_categorized, article
         articles_categorized=articles_categorized,
         articles_analyzed=articles_analyzed,
         authors_profiled=authors_profiled,
+        publications_profiled=publications_profiled,
         date_range_start=earliest.published_date if earliest else None,
         date_range_end=latest.published_date if latest else None,
     )
@@ -225,14 +309,14 @@ def main():
     parser.add_argument(
         '--months',
         type=int,
-        default=6,
-        help='Number of months of data to collect (default: 6)'
+        default=12,
+        help='Number of months of data to collect (default: 12)'
     )
     parser.add_argument(
         '--max-per-source',
         type=int,
-        default=100,
-        help='Maximum articles per source (default: 100)'
+        default=200,
+        help='Maximum articles per source (default: 200)'
     )
     parser.add_argument(
         '--skip-collection',
@@ -288,6 +372,7 @@ def main():
     for article in Article.objects.all():
         article_data = {
             'author': article.author,
+            'publication': article.publication,
             'title': article.title,
             'url': article.url,
             'published_date': article.published_date,
@@ -307,17 +392,24 @@ def main():
     print(f"  ✓ Loaded {len(all_articles)} articles")
 
     # Step 6: Profile authors
-    profiles = profile_authors(all_articles, min_articles=3)
+    author_profiles = profile_authors(all_articles, min_articles=3, min_total_articles=2)
 
-    # Step 7: Save profiles to database
-    save_author_profiles_to_db(profiles)
+    # Step 7: Save author profiles to database
+    save_author_profiles_to_db(author_profiles)
 
-    # Step 8: Create analysis run record
+    # Step 8: Profile publications
+    publication_profiles = profile_publications(all_articles, min_articles=3)
+
+    # Step 9: Save publication profiles to database
+    save_publication_profiles_to_db(publication_profiles)
+
+    # Step 10: Create analysis run record
     create_analysis_run_record(
         articles_collected=len(articles) if articles else 0,
         articles_categorized=len([a for a in articles if a.get('categories')]) if articles else 0,
         articles_analyzed=len(articles) if articles else 0,
-        authors_profiled=len(profiles)
+        authors_profiled=len(author_profiles),
+        publications_profiled=len(publication_profiles)
     )
 
     print("\n" + "=" * 70)

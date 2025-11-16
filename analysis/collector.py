@@ -20,8 +20,9 @@ class NewsSource:
         self.domain = domain
 
 
-# Diverse news sources across the political spectrum
+# Diverse news sources across the political spectrum and topic areas
 NEWS_SOURCES = [
+    # General News
     NewsSource("BBC News", "http://feeds.bbci.co.uk/news/rss.xml", "bbc.com"),
     NewsSource("Reuters", "https://www.reutersagency.com/feed/", "reuters.com"),
     NewsSource("The Guardian", "https://www.theguardian.com/world/rss", "theguardian.com"),
@@ -29,7 +30,36 @@ NEWS_SOURCES = [
     NewsSource("Al Jazeera", "https://www.aljazeera.com/xml/rss/all.xml", "aljazeera.com"),
     NewsSource("The Hill", "https://thehill.com/feed/", "thehill.com"),
     NewsSource("Axios", "https://api.axios.com/feed/", "axios.com"),
+
+    # Politics & Policy
+    NewsSource("Politico", "https://www.politico.com/rss/politics08.xml", "politico.com"),
+    NewsSource("The Washington Post", "https://feeds.washingtonpost.com/rss/politics", "washingtonpost.com"),
+    NewsSource("CNN Politics", "http://rss.cnn.com/rss/cnn_allpolitics.rss", "cnn.com"),
+
+    # Business & Economy
+    NewsSource("Bloomberg", "https://feeds.bloomberg.com/markets/news.rss", "bloomberg.com"),
+    NewsSource("Financial Times", "https://www.ft.com/?format=rss", "ft.com"),
+    NewsSource("Wall Street Journal", "https://feeds.a.dj.com/rss/RSSMarketsMain.xml", "wsj.com"),
+    NewsSource("Forbes", "https://www.forbes.com/real-time/feed2/", "forbes.com"),
+
+    # Technology
     NewsSource("TechCrunch", "https://techcrunch.com/feed/", "techcrunch.com"),
+    NewsSource("Ars Technica", "http://feeds.arstechnica.com/arstechnica/index", "arstechnica.com"),
+    NewsSource("The Verge", "https://www.theverge.com/rss/index.xml", "theverge.com"),
+    NewsSource("WIRED", "https://www.wired.com/feed/rss", "wired.com"),
+
+    # Science & Environment
+    NewsSource("Scientific American", "http://rss.sciam.com/ScientificAmerican-Global", "scientificamerican.com"),
+    NewsSource("Nature News", "http://feeds.nature.com/nature/rss/current", "nature.com"),
+    NewsSource("Grist", "https://grist.org/feed/", "grist.org"),
+
+    # Health
+    NewsSource("STAT News", "https://www.statnews.com/feed/", "statnews.com"),
+    NewsSource("Health Affairs", "https://www.healthaffairs.org/do/10.1377/hp.rss/full/", "healthaffairs.org"),
+
+    # Energy
+    NewsSource("E&E News", "https://www.eenews.net/rss/", "eenews.net"),
+    NewsSource("Utility Dive", "https://www.utilitydive.com/feeds/news/", "utilitydive.com"),
 ]
 
 
@@ -236,13 +266,13 @@ class ArticleCollector:
         return articles_with_authors
 
 
-def collect_news_data(months_back: int = 6, max_per_source: int = 100) -> List[Dict]:
+def collect_news_data(months_back: int = 12, max_per_source: int = 200) -> List[Dict]:
     """
     Main function to collect news data.
 
     Args:
-        months_back: How many months of data to collect
-        max_per_source: Maximum articles per source
+        months_back: How many months of data to collect (default: 12)
+        max_per_source: Maximum articles per source (default: 200)
 
     Returns:
         List of article dictionaries

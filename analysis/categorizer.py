@@ -9,35 +9,16 @@ import re
 
 # Topic categories and their associated keywords
 CATEGORIES = {
-    'nuclear_energy': {
-        'label': 'Nuclear Energy',
+    # Government & Policy
+    'federal_budget': {
+        'label': 'Federal Budget & National Debt',
         'keywords': [
-            'nuclear', 'reactor', 'fission', 'uranium', 'plutonium',
-            'nuclear power', 'nuclear plant', 'radioactive', 'chernobyl',
-            'fukushima', 'three mile island', 'atomic energy', 'SMR',
-            'small modular reactor', 'thorium', 'nuclear waste'
+            'federal budget', 'national debt', 'deficit', 'fiscal policy',
+            'spending', 'budget deficit', 'debt ceiling', 'appropriations',
+            'fiscal cliff', 'sequestration', 'budget resolution', 'CBO',
+            'congressional budget office', 'debt-to-GDP', 'budget surplus'
         ],
-        'description': 'Nuclear energy, power plants, and atomic technology'
-    },
-    'data_centers': {
-        'label': 'Data Centers',
-        'keywords': [
-            'data center', 'data centre', 'server farm', 'cloud infrastructure',
-            'colocation', 'hyperscale', 'edge computing', 'CDN',
-            'data storage', 'server rack', 'cooling', 'power usage effectiveness',
-            'PUE', 'AWS', 'Azure', 'Google Cloud', 'datacenter'
-        ],
-        'description': 'Data centers, cloud infrastructure, and server facilities'
-    },
-    'healthcare': {
-        'label': 'Healthcare',
-        'keywords': [
-            'healthcare', 'health care', 'medical', 'hospital', 'doctor',
-            'nurse', 'patient', 'medicare', 'medicaid', 'insurance',
-            'pharmaceutical', 'drug price', 'vaccine', 'treatment',
-            'diagnosis', 'clinical', 'epidemic', 'pandemic', 'public health'
-        ],
-        'description': 'Healthcare systems, medical treatment, and public health'
+        'description': 'Federal budget, national debt, spending, deficits, and fiscal policy'
     },
     'immigration': {
         'label': 'Immigration',
@@ -45,20 +26,322 @@ CATEGORIES = {
             'immigration', 'immigrant', 'migrant', 'refugee', 'asylum',
             'border', 'visa', 'green card', 'citizenship', 'deportation',
             'ICE', 'border patrol', 'DACA', 'undocumented', 'illegal immigration',
-            'refugee crisis', 'migration', 'border security'
+            'refugee crisis', 'migration', 'border security', 'immigration reform',
+            'H1B', 'work visa', 'sanctuary city'
         ],
-        'description': 'Immigration policy, border issues, and refugee matters'
+        'description': 'Immigration, border security, asylum policies, and visa reform'
+    },
+    'gun_control': {
+        'label': 'Gun Control & Second Amendment',
+        'keywords': [
+            'gun control', 'second amendment', 'firearms', 'gun violence',
+            'background check', 'assault weapon', 'NRA', 'gun rights',
+            'gun legislation', 'concealed carry', 'open carry', 'red flag law',
+            'mass shooting', 'gun safety', 'gun reform', 'ATF',
+            'gun permit', 'stand your ground'
+        ],
+        'description': 'Gun control legislation, Second Amendment rights, court cases, and public debate'
+    },
+    'elections': {
+        'label': 'Elections & Campaign Finance',
+        'keywords': [
+            'election', 'campaign', 'polling', 'voter', 'ballot',
+            'campaign finance', 'PAC', 'super PAC', 'election integrity',
+            'voter fraud', 'gerrymandering', 'electoral college', 'primary',
+            'caucus', 'midterm', 'presidential election', 'voting rights',
+            'FEC', 'campaign contribution', 'dark money'
+        ],
+        'description': 'Elections, polling, election integrity, campaign finance, and funding'
+    },
+    'judiciary': {
+        'label': 'Judiciary & Supreme Court',
+        'keywords': [
+            'supreme court', 'SCOTUS', 'judicial', 'justice', 'court ruling',
+            'federal judge', 'circuit court', 'appellate court', 'judicial nominee',
+            'confirmation', 'judicial philosophy', 'originalism', 'constitutional',
+            'court decision', 'dissent', 'majority opinion', 'judicial review',
+            'federal judiciary', 'bench', 'judicial appointment'
+        ],
+        'description': 'Judiciary, Supreme Court rulings, nominations, and judicial philosophy'
+    },
+    'foreign_policy': {
+        'label': 'Foreign Policy & International Trade',
+        'keywords': [
+            'foreign policy', 'diplomacy', 'international trade', 'tariff',
+            'trade agreement', 'USMCA', 'trade war', 'sanctions', 'embargo',
+            'trade deficit', 'export', 'import', 'WTO', 'bilateral',
+            'multilateral', 'trade deal', 'diplomatic relations', 'treaty',
+            'foreign aid', 'state department'
+        ],
+        'description': 'Foreign policy, tariffs, trade agreements, and diplomatic relations'
+    },
+
+    # Economy & Business
+    'federal_reserve': {
+        'label': 'Federal Reserve & Inflation',
+        'keywords': [
+            'federal reserve', 'Fed', 'interest rate', 'inflation', 'deflation',
+            'monetary policy', 'FOMC', 'Jerome Powell', 'rate hike', 'rate cut',
+            'quantitative easing', 'CPI', 'consumer price index', 'core inflation',
+            'PCE', 'cost of living', 'price stability', 'central bank'
+        ],
+        'description': 'Federal Reserve, interest rate policy, inflation, and cost-of-living changes'
+    },
+    'labor_employment': {
+        'label': 'Labor & Employment',
+        'keywords': [
+            'employment', 'unemployment', 'jobs report', 'labor market',
+            'wage', 'salary', 'union', 'unionization', 'collective bargaining',
+            'strike', 'labor shortage', 'gig economy', 'minimum wage',
+            'unemployment rate', 'job growth', 'hiring', 'layoffs',
+            'labor force participation', 'worker rights'
+        ],
+        'description': 'Jobs reports, employment, unionization, and wage growth'
+    },
+    'supply_chain': {
+        'label': 'Supply Chain Management',
+        'keywords': [
+            'supply chain', 'logistics', 'shipping', 'port', 'freight',
+            'container ship', 'warehouse', 'inventory', 'manufacturing',
+            'production', 'shortage', 'backlog', 'bottleneck', 'distribution',
+            'just-in-time', 'nearshoring', 'reshoring', 'supplier'
+        ],
+        'description': 'Supply chain logistics, port activity, and manufacturing resilience'
+    },
+    'real_estate': {
+        'label': 'Real Estate & Housing',
+        'keywords': [
+            'real estate', 'housing', 'home price', 'mortgage', 'housing market',
+            'affordable housing', 'rent', 'rental market', 'homeownership',
+            'housing affordability', 'property value', 'foreclosure',
+            'housing shortage', 'residential', 'commercial real estate',
+            'mortgage rate', 'home sales', 'housing crisis'
+        ],
+        'description': 'Real estate market trends, housing affordability, and interest rates'
+    },
+    'small_business': {
+        'label': 'Small Business & Entrepreneurship',
+        'keywords': [
+            'small business', 'startup', 'entrepreneur', 'SMB', 'SME',
+            'business loan', 'SBA', 'small business administration',
+            'venture capital', 'angel investor', 'seed funding',
+            'business regulation', 'small business owner', 'main street',
+            'local business', 'franchise', 'business formation'
+        ],
+        'description': 'Small businesses, startups, lending, and regulatory challenges'
+    },
+
+    # Technology & Industry
+    'ai_regulation': {
+        'label': 'Artificial Intelligence (AI) Regulation',
+        'keywords': [
+            'AI regulation', 'artificial intelligence policy', 'AI ethics',
+            'AI safety', 'algorithmic bias', 'AI governance', 'AI oversight',
+            'machine learning regulation', 'AI accountability', 'AI transparency',
+            'AI standards', 'responsible AI', 'AI risk', 'AI framework',
+            'generative AI', 'large language model', 'LLM'
+        ],
+        'description': 'AI regulation, policy, ethics, and safety'
     },
     'technology': {
         'label': 'Technology Industry',
         'keywords': [
-            'tech industry', 'silicon valley', 'startup', 'big tech',
-            'artificial intelligence', 'AI', 'machine learning', 'software',
-            'algorithm', 'cryptocurrency', 'blockchain', 'metaverse',
-            'social media', 'platform', 'app', 'digital', 'innovation',
-            'venture capital', 'IPO', 'tech company'
+            'tech industry', 'silicon valley', 'big tech', 'tech company',
+            'software', 'platform', 'app', 'digital', 'innovation',
+            'tech layoffs', 'antitrust', 'tech monopoly', 'tech earnings',
+            'social media', 'content moderation', 'section 230',
+            'tech regulation', 'tech sector', 'IPO'
         ],
-        'description': 'Technology industry, AI, and digital innovation'
+        'description': 'Technology industry, layoffs, innovations, and antitrust'
+    },
+    'data_centers': {
+        'label': 'Data Center Development',
+        'keywords': [
+            'data center', 'data centre', 'server farm', 'cloud infrastructure',
+            'colocation', 'hyperscale', 'edge computing', 'datacenter',
+            'data storage', 'server rack', 'cooling', 'power usage effectiveness',
+            'PUE', 'AWS', 'Azure', 'Google Cloud', 'data center energy',
+            'data center location', 'data center infrastructure'
+        ],
+        'description': 'Data center development, energy use, location, and infrastructure'
+    },
+    'cybersecurity': {
+        'label': 'Cybersecurity',
+        'keywords': [
+            'cybersecurity', 'cyber attack', 'data breach', 'hacking',
+            'ransomware', 'malware', 'phishing', 'cyber threat',
+            'encryption', 'data privacy', 'CISA', 'national security cyber',
+            'critical infrastructure', 'cyber defense', 'vulnerability',
+            'zero-day', 'security patch', 'cyber espionage'
+        ],
+        'description': 'Cybersecurity, national security threats, data breaches, and privacy'
+    },
+    'semiconductor': {
+        'label': 'Semiconductor Industry',
+        'keywords': [
+            'semiconductor', 'chip', 'microchip', 'silicon', 'fab',
+            'fabrication', 'TSMC', 'Intel', 'chip shortage', 'CHIPS Act',
+            'chip manufacturing', 'foundry', 'wafer', 'chipmaker',
+            'semiconductor subsidy', 'chip R&D', 'advanced packaging',
+            'chip design', 'EUV lithography'
+        ],
+        'description': 'Semiconductor industry, domestic manufacturing, subsidies, and R&D'
+    },
+
+    # Energy & Environment
+    'climate_change': {
+        'label': 'Climate Change & Policy',
+        'keywords': [
+            'climate change', 'global warming', 'greenhouse gas', 'emissions',
+            'carbon emissions', 'net zero', 'climate policy', 'Paris agreement',
+            'climate accord', 'decarbonization', 'carbon neutral',
+            'climate action', 'climate summit', 'IPCC', 'carbon footprint',
+            'climate target', 'emissions reduction', 'climate crisis'
+        ],
+        'description': 'Climate change, emissions reduction, and international agreements'
+    },
+    'energy_transition': {
+        'label': 'Energy Transition',
+        'keywords': [
+            'renewable energy', 'solar', 'wind', 'solar power', 'wind power',
+            'clean energy', 'green energy', 'energy transition', 'solar panel',
+            'wind turbine', 'offshore wind', 'solar farm', 'wind farm',
+            'grid modernization', 'smart grid', 'energy storage', 'battery storage',
+            'transmission lines', 'grid infrastructure'
+        ],
+        'description': 'Energy transition, renewable sources (solar, wind), and grid modernization'
+    },
+    'nuclear_energy': {
+        'label': 'Nuclear Energy',
+        'keywords': [
+            'nuclear', 'nuclear power', 'nuclear plant', 'reactor',
+            'nuclear energy', 'SMR', 'small modular reactor', 'advanced reactor',
+            'uranium', 'nuclear fuel', 'nuclear waste', 'radioactive',
+            'atomic energy', 'fission', 'nuclear facility', 'nuclear construction',
+            'nuclear license', 'NRC'
+        ],
+        'description': 'Nuclear energy, new plant development, and SMRs (Small Modular Reactors)'
+    },
+    'oil_gas': {
+        'label': 'Oil & Gas Industry',
+        'keywords': [
+            'oil', 'gas', 'petroleum', 'crude oil', 'natural gas', 'LNG',
+            'oil price', 'gas price', 'OPEC', 'drilling', 'fracking',
+            'shale', 'pipeline', 'refinery', 'oil production', 'energy independence',
+            'strategic petroleum reserve', 'SPR', 'fossil fuel'
+        ],
+        'description': 'Oil and gas industry, production levels, pricing, and energy independence'
+    },
+    'water_rights': {
+        'label': 'Water Rights & Scarcity',
+        'keywords': [
+            'water rights', 'water scarcity', 'drought', 'water shortage',
+            'Colorado River', 'water allocation', 'water conservation',
+            'groundwater', 'aquifer', 'water reservoir', 'Lake Mead',
+            'desalination', 'water policy', 'water supply', 'irrigation',
+            'water management', 'water crisis', 'western water'
+        ],
+        'description': 'Water rights and scarcity, particularly in the Western U.S.'
+    },
+
+    # Society & Health
+    'health_insurance': {
+        'label': 'Health Insurance & Policy',
+        'keywords': [
+            'health insurance', 'ACA', 'Affordable Care Act', 'Obamacare',
+            'Medicare', 'Medicaid', 'healthcare policy', 'insurance coverage',
+            'health plan', 'premium', 'deductible', 'copay', 'insurance cost',
+            'uninsured', 'Medicare for All', 'public option', 'insurance marketplace'
+        ],
+        'description': 'Health insurance, Affordable Care Act (ACA), Medicare, and costs'
+    },
+    'pharmaceuticals': {
+        'label': 'Pharmaceuticals & Drug Pricing',
+        'keywords': [
+            'pharmaceutical', 'drug price', 'prescription', 'medication',
+            'pharmacy', 'drug cost', 'FDA', 'drug approval', 'clinical trial',
+            'pharma', 'generic drug', 'brand name drug', 'drug manufacturer',
+            'insulin', 'drug negotiation', 'pharma R&D', 'biopharmaceutical'
+        ],
+        'description': 'Pharmaceuticals, prescription costs, FDA approvals, and R&D'
+    },
+    'public_health': {
+        'label': 'Public Health',
+        'keywords': [
+            'public health', 'CDC', 'epidemic', 'pandemic', 'disease',
+            'vaccination', 'vaccine', 'immunization', 'outbreak',
+            'health crisis', 'infectious disease', 'virus', 'prevention',
+            'substance abuse', 'opioid', 'addiction', 'mental health',
+            'health emergency', 'WHO'
+        ],
+        'description': 'Public health, CDC guidance, pandemic preparedness, and substance abuse'
+    },
+    'education': {
+        'label': 'Education (K-12 & Higher Ed)',
+        'keywords': [
+            'education', 'school', 'K-12', 'elementary', 'high school',
+            'college', 'university', 'higher education', 'student loan',
+            'curriculum', 'education policy', 'school funding', 'teacher',
+            'education reform', 'charter school', 'school choice',
+            'standardized test', 'literacy', 'tuition', 'student debt'
+        ],
+        'description': 'Education, funding, curriculum debates, and student loans'
+    },
+    'criminal_justice': {
+        'label': 'Criminal Justice Reform',
+        'keywords': [
+            'criminal justice', 'policing', 'police reform', 'prison',
+            'incarceration', 'sentencing', 'parole', 'probation',
+            'criminal justice reform', 'law enforcement', 'police brutality',
+            'mass incarceration', 'bail reform', 'prison reform',
+            'recidivism', 'rehabilitation', 'sentencing reform'
+        ],
+        'description': 'Criminal justice reform, policing, sentencing, and prison systems'
+    },
+    'social_security': {
+        'label': 'Social Security & Entitlements',
+        'keywords': [
+            'social security', 'SSA', 'retirement', 'pension', 'entitlement',
+            'disability', 'SSDI', 'SSI', 'social security trust fund',
+            'retirement age', 'social security benefits', 'COLA',
+            'cost of living adjustment', 'social security solvency',
+            'entitlement reform', 'Medicare trust fund'
+        ],
+        'description': 'Social Security, entitlements, long-term solvency, and policy debates'
+    },
+
+    # Infrastructure & Transport
+    'infrastructure': {
+        'label': 'National Infrastructure',
+        'keywords': [
+            'infrastructure', 'roads', 'bridges', 'highway', 'public works',
+            'infrastructure bill', 'infrastructure spending', 'construction',
+            'transportation infrastructure', 'water infrastructure',
+            'sewer', 'infrastructure investment', 'crumbling infrastructure',
+            'infrastructure repair', 'federal infrastructure', 'IIJA'
+        ],
+        'description': 'National infrastructure, roads, bridges, and public works spending'
+    },
+    'telecommunications': {
+        'label': 'Telecommunications',
+        'keywords': [
+            'telecommunications', '5G', 'broadband', 'internet access',
+            'rural broadband', 'fiber optic', 'wireless', 'cellular',
+            'net neutrality', 'FCC', 'spectrum', 'telecom', 'connectivity',
+            'digital divide', 'internet service provider', 'ISP', 'bandwidth'
+        ],
+        'description': 'Telecommunications, 5G rollout, rural broadband, and net neutrality'
+    },
+    'aerospace': {
+        'label': 'Aerospace & Aviation',
+        'keywords': [
+            'aerospace', 'aviation', 'FAA', 'airline', 'aircraft',
+            'aviation safety', 'air travel', 'airport', 'Boeing', 'Airbus',
+            'space exploration', 'NASA', 'SpaceX', 'satellite', 'rocket',
+            'commercial space', 'space industry', 'aviation regulation',
+            'flight', 'space mission'
+        ],
+        'description': 'Aerospace, aviation, FAA regulation, airline industry, and space exploration'
     }
 }
 
